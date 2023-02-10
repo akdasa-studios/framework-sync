@@ -1,6 +1,5 @@
-import { HasVersion } from '@lib/SyncRepository'
 import { Aggregate, AnyIdentity } from '@akdasa-studios/framework'
-import { SyncRepository } from './SyncRepository'
+import { HasVersion , SyncRepository } from '@lib/SyncRepository'
 
 
 export interface ConflictSolver<TEntity extends Aggregate<AnyIdentity>> {
