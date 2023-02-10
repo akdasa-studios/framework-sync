@@ -1,22 +1,8 @@
-import { Aggregate, AnyIdentity, Identity, InMemoryRepository } from '@akdasa-studios/framework'
-import { HasVersion, SyncRepository } from '@lib/SyncRepository'
-import { ConflictSolver, SyncService } from '@lib/SyncService'
+import { InMemoryRepository } from '@akdasa-studios/framework'
+import { SyncRepository } from '@lib/SyncRepository'
+import { SyncService } from '@lib/SyncService'
+import { Row, RowConflictSolwer, RowId } from './fixtures'
 
-
-export class RowId extends Identity<string, 'Row'> {}
-class Row extends Aggregate<RowId> implements HasVersion {
-  constructor(id: RowId, text = 'default') {
-    super(id)
-    this.text = text
-  }
-  version: string
-  text: string
-}
-class RowConflictSolwer implements ConflictSolver<Row> {
-  solve(object1: Row, object2: Row): Aggregate<AnyIdentity> & HasVersion {
-    return object1.text.length > object2.text.length ? object1 : object2
-  }
-}
 
 describe('SyncService', () => {
   let row1: Row

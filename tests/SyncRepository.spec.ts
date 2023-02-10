@@ -1,12 +1,6 @@
-import { Aggregate, Identity, InMemoryRepository } from '@akdasa-studios/framework'
-import { SyncRepository, HasVersion } from '@lib/SyncRepository'
-
-
-export class RowId extends Identity<string, 'Row'> {}
-class Row extends Aggregate<RowId> implements HasVersion {
-  version: string
-  text: string
-}
+import { InMemoryRepository } from '@akdasa-studios/framework'
+import { SyncRepository } from '@lib/SyncRepository'
+import { Row, RowId } from './fixtures'
 
 
 describe('SyncRepository', () => {
