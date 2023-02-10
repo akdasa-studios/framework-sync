@@ -1,5 +1,5 @@
 {
-  "name": "@akdasa-studios/template-lib",
+  "name": "@akdasa-studios/framework-sync",
   "version": "0.0.1",
   "description": "Template",
   "main": "dist/index.js",
@@ -24,14 +24,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/akdasa-studios/template-lib.git"
+    "url": "git+https://github.com/akdasa-studios/framework-sync.git"
   },
   "author": "Advaita Kṛṣṇa Dāsa",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/akdasa-studios/template-lib/issues"
+    "url": "https://github.com/akdasa-studios/framework-sync/issues"
   },
-  "homepage": "https://github.com/akdasa-studios/template-lib#readme",
+  "homepage": "https://github.com/akdasa-studios/framework-sync#readme",
   "dependencies": {
     "@akdasa-studios/framework": "0.2.8"
   },
