@@ -1,0 +1,52 @@
+{
+  "name": "@akdasa-studios/template-lib",
+  "version": "0.0.1",
+  "description": "Template",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "./dist/index.js",
+    "./dist/index.d.ts"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "test": "jest && stryker run",
+    "test:unit": "jest",
+    "test:mutational": "stryker run",
+    "lint": "eslint ./lib --ext .ts",
+    "build": "webpack && tsc --emitDeclarationOnly --declaration --outDir ./.temp/api && api-extractor run --local && true"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/akdasa-studios/template-lib.git"
+  },
+  "author": "Advaita Kṛṣṇa Dāsa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/akdasa-studios/template-lib/issues"
+  },
+  "homepage": "https://github.com/akdasa-studios/template-lib#readme",
+  "devDependencies": {
+    "@stryker-mutator/core": "^6.3.0",
+    "@stryker-mutator/jest-runner": "^6.3.0",
+    "@stryker-mutator/typescript-checker": "^6.3.0",
+    "@types/jest": "^29.2.3",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
+    "@typescript-eslint/parser": "^5.44.0",
+    "eslint": "^8.28.0",
+    "jest": "^29.3.1",
+    "resolve-tspaths": "^0.8.3",
+    "ts-jest": "^29.0.3",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.9.3",
+    "webpack-cli": "^5.0.0",
+    "webpack": "^5.75.0",
+    "@microsoft/api-extractor": "^7.33.6"
+  }
+}

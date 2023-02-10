@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "ES6",
+    // "strict": true,
+    "moduleResolution": "node",
+    "importHelpers": false,
+    // "declaration": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./lib",
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "allowSyntheticDefaultImports": true,
+    // "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    // "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "@lib/*": [
+        "./lib/*"
+      ],
+      "@tests/*": [
+        "./tests/*"
+      ]
+    }
+  },
+  "include": [
+    "lib/**/*.ts",
+    "lib/**/*.d.ts"
+  ]
+}

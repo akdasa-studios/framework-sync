@@ -1,0 +1,32 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "packageManager": "npm",
+  "reporters": [
+    "html",
+    "clear-text",
+    "progress",
+    "dashboard"
+  ],
+  "htmlReporter": {
+    "fileName": ".temp/stryker/report.html"
+  },
+  "testRunner": "jest",
+  "coverageAnalysis": "perTest",
+  "checkers": [
+    "typescript"
+  ],
+  "ignorePatterns": [
+    ".temp/*",
+    "coverage/*",
+    "dist/*"
+  ],
+  "tsconfigFile": "tsconfig.json",
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 100
+  },
+  "incremental": true,
+  "incrementalFile": ".temp/stryker/incremental.json",
+  "tempDirName": ".temp/stryker/temp"
+}

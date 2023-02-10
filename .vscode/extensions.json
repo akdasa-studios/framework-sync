@@ -1,0 +1,17 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "christian-kohler.path-intellisense",
+    "mikestead.dotenv",
+    "steoates.autoimport",
+    "eamodio.gitlens",
+    "github.vscode-pull-request-github",
+    "orta.vscode-jest",
+    "dbaeumer.vscode-eslint",
+    "howardzuo.vscode-npm-dependency",
+    "aaron-bond.better-comments",
+    "stackbreak.comment-divider",
+    "bierner.markdown-mermaid",
+    "yzhang.markdown-all-in-one",
+  ]
+}
