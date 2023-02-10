@@ -1,1 +1,2 @@
-export * from './example'
+export * from './SyncRepository'
+export * from './SyncService'

@@ -10,5 +10,8 @@ module.exports = {
   moduleNameMapper: {
     '^@lib/(.*)': '<rootDir>/lib/$1',
     '^@tests/(.*)': '<rootDir>/tests/$1',
-  }
+  },
+  setupFilesAfterEnv: [
+    'jest-extended/all'
+  ]
 }
