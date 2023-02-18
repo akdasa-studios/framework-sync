@@ -31,7 +31,7 @@ export class SyncRepository<
    * Get all entities.
    * @returns All entities.
    */
-  all(): Promise<Result<readonly TEntity[]>> {
+  async all(): Promise<Result<readonly TEntity[]>> {
     return this.repo.all()
   }
 
@@ -39,7 +39,7 @@ export class SyncRepository<
    * Save entity.
    * @param entity Entity to save.
    */
-  save(entity: TEntity, options?: Partial<SaveOptions>): Promise<Result<void, string>> {
+  async save(entity: TEntity, options?: Partial<SaveOptions>): Promise<Result<void, string>> {
     const saveOptions: SaveOptions = {
       ...DEFAULT_SAVE_OPTIONS,
       ...options
@@ -54,7 +54,7 @@ export class SyncRepository<
    * Get entity by identity.
    * @param id Identity of the entity to load.
    */
-  get(id: TEntity['id']): Promise<Result<TEntity, string>> {
+  async get(id: TEntity['id']): Promise<Result<TEntity, string>> {
     return this.repo.get(id)
   }
 
@@ -62,7 +62,7 @@ export class SyncRepository<
    * Check if entity exists.
    * @param id Identity of the entity to check.
    */
-  exists(id: TEntity['id']): Promise<boolean> {
+  async exists(id: TEntity['id']): Promise<boolean> {
     return this.repo.exists(id)
   }
 
@@ -70,7 +70,7 @@ export class SyncRepository<
    * Find entities by query.
    * @param query Query to find entities by.
    */
-  find(query: Query<TEntity>): Promise<Result<readonly TEntity[]>> {
+  async find(query: Query<TEntity>): Promise<Result<readonly TEntity[]>> {
     return this.repo.find(query)
   }
 
@@ -78,7 +78,7 @@ export class SyncRepository<
    * Delete entity by identity.
    * @param id Identity of the entity to remove.
    */
-  delete(id: TEntity['id']): Promise<Result<void, string>> {
+  async delete(id: TEntity['id']): Promise<Result<void, string>> {
     return this.repo.delete(id)
   }
 }
