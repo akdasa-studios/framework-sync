@@ -38,7 +38,7 @@ export class SyncService<
     for (const sourceEntity of entitiesToSync) {
       const targetEntity = await target.get(sourceEntity.id)
       if (targetEntity.isFailure) {
-        target.save(sourceEntity, syncOptions)
+        await target.save(sourceEntity, syncOptions)
       } else {
         if (sourceEntity.version !== targetEntity.value.version) {
           const winner = this.conflictSolver.solve(sourceEntity, targetEntity.value)
