@@ -38,18 +38,14 @@ export class SyncService<
     for (const sourceEntity of entitiesToSync) {
       const targetEntity = await target.get(sourceEntity.id)
       if (targetEntity.isFailure) {
-        // no object on target
-        // console.log('sync [404]:', sourceEntity.version, targetEntity.value.version)
         target.save(sourceEntity, syncOptions)
       } else {
         if (sourceEntity.version !== targetEntity.value.version) {
-          // console.log('sync [200]:', sourceEntity.version, targetEntity.value.version)
           const winner = this.conflictSolver.solve(sourceEntity, targetEntity.value)
-          // console.log('>> versions do not match', winner)
           if (winner === sourceEntity) {
-            target.save(sourceEntity, syncOptions)
+            await target.save(sourceEntity, syncOptions)
           } else {
-            source.save(targetEntity.value, syncOptions)
+            await source.save(targetEntity.value, syncOptions)
           }
         }
       }
