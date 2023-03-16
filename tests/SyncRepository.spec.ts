@@ -22,7 +22,7 @@ describe('SyncRepository', () => {
 
       // assert
       const result = await repo.get(row1.id)
-      expect(result.value.version).toBeDefined()
+      expect(result.version).toBeDefined()
     })
 
     it('do not set version', async () => {
@@ -30,7 +30,7 @@ describe('SyncRepository', () => {
 
       // assert
       const result = await repo.get(row1.id)
-      expect(result.value.version).toBeUndefined()
+      expect(result.version).toBeUndefined()
     })
 
     it('do not update version', async () => {
@@ -40,8 +40,19 @@ describe('SyncRepository', () => {
 
       // assert
       const result = await repo.get(row1.id)
-      expect(result.value.version).toEqual(oldVersion)
-      expect(result.value.version).toBeDefined()
+      expect(result.version).toEqual(oldVersion)
+      expect(result.version).toBeDefined()
+    })
+  })
+
+  describe('.delete', () => {
+    it('should delete', async () => {
+      await repo.save(row1)
+      await repo.delete(row1.id)
+
+      // assert
+      const result = () => repo.get(row1.id)
+      await expect(result).rejects.toThrowError()
     })
   })
 })

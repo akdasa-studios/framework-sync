@@ -32,7 +32,7 @@ describe('SyncService', () => {
       await repoA.save(row1)
       await service.sync(repoA, repoB)
 
-      const repoBEntities = (await repoB.all()).value
+      const repoBEntities = await repoB.all()
       expect(repoBEntities.length).toEqual(1)
       expect(repoBEntities[0].id.value).toEqual(row1.id.value)
       expect(repoBEntities[0].text).toEqual(row1.text)
@@ -48,8 +48,8 @@ describe('SyncService', () => {
       await service.sync(repoA, repoB)
 
       // assert
-      const allA = (await repoA.all()).value
-      const allB = (await repoB.all()).value
+      const allA = await repoA.all()
+      const allB = await repoB.all()
       expect(allA).toHaveLength(2)
       expect(allB).toHaveLength(2)
 
@@ -76,8 +76,8 @@ describe('SyncService', () => {
       await service.sync(repoA, repoB)
 
       // assert
-      row1 = (await repoA.get(new RowId('row1'))).value
-      row2 = (await repoB.get(new RowId('row1'))).value
+      row1 = await repoA.get(new RowId('row1'))
+      row2 = await repoB.get(new RowId('row1'))
 
       expect(row1.text).toEqual('!winner!')
       expect(row2.text).toEqual('!winner!')
@@ -95,8 +95,8 @@ describe('SyncService', () => {
       await service.sync(repoA, repoB)
 
       // assert
-      row1 = (await repoA.get(new RowId('row1'))).value
-      row2 = (await repoB.get(new RowId('row1'))).value
+      row1 = await repoA.get(new RowId('row1'))
+      row2 = await repoB.get(new RowId('row1'))
 
       expect(row1.text).toEqual('!WINNER!')
       expect(row2.text).toEqual('!WINNER!')

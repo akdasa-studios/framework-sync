@@ -1,4 +1,4 @@
-import { Repository, Aggregate, AnyIdentity, Result, Query } from '@akdasa-studios/framework'
+import { Repository, Aggregate, AnyIdentity, Query } from '@akdasa-studios/framework'
 
 
 export interface HasVersion {
@@ -31,7 +31,7 @@ export class SyncRepository<
    * Get all entities.
    * @returns All entities.
    */
-  async all(): Promise<Result<readonly TEntity[]>> {
+  async all(): Promise<readonly TEntity[]> {
     return this.repo.all()
   }
 
@@ -39,7 +39,7 @@ export class SyncRepository<
    * Save entity.
    * @param entity Entity to save.
    */
-  async save(entity: TEntity, options?: Partial<SaveOptions>): Promise<Result<void, string>> {
+  async save(entity: TEntity, options?: Partial<SaveOptions>): Promise<void> {
     const saveOptions: SaveOptions = {
       ...DEFAULT_SAVE_OPTIONS,
       ...options
@@ -54,7 +54,7 @@ export class SyncRepository<
    * Get entity by identity.
    * @param id Identity of the entity to load.
    */
-  async get(id: TEntity['id']): Promise<Result<TEntity, string>> {
+  async get(id: TEntity['id']): Promise<TEntity> {
     return this.repo.get(id)
   }
 
@@ -70,7 +70,7 @@ export class SyncRepository<
    * Find entities by query.
    * @param query Query to find entities by.
    */
-  async find(query: Query<TEntity>): Promise<Result<readonly TEntity[]>> {
+  async find(query: Query<TEntity>): Promise<readonly TEntity[]> {
     return this.repo.find(query)
   }
 
@@ -78,7 +78,7 @@ export class SyncRepository<
    * Delete entity by identity.
    * @param id Identity of the entity to remove.
    */
-  async delete(id: TEntity['id']): Promise<Result<void, string>> {
+  async delete(id: TEntity['id']): Promise<void> {
     return this.repo.delete(id)
   }
 }

@@ -30,22 +30,23 @@ export class SyncService<
     source: SyncRepository<TEntity>,
     target: SyncRepository<TEntity>,
   ) {
-    // TODO: get only changes entities
+    // TODO: get only changed entities
     // Stryker disable next-line all
     const syncOptions = { updateVersion: false }
-    const entitiesToSync = (await source.all()).value
+    const entitiesToSync = await source.all()
 
     for (const sourceEntity of entitiesToSync) {
-      const targetEntity = await target.get(sourceEntity.id)
-      if (targetEntity.isFailure) {
+      let targetEntity: TEntity|undefined = undefined
+      try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass */}
+      if (!targetEntity) {
         await target.save(sourceEntity, syncOptions)
       } else {
-        if (sourceEntity.version !== targetEntity.value.version) {
-          const winner = this.conflictSolver.solve(sourceEntity, targetEntity.value)
+        if (sourceEntity.version !== targetEntity.version) {
+          const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
           if (winner === sourceEntity) {
             await target.save(sourceEntity, syncOptions)
           } else {
-            await source.save(targetEntity.value, syncOptions)
+            await source.save(targetEntity, syncOptions)
           }
         }
       }
