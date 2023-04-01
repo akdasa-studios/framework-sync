@@ -1,6 +1,6 @@
 {
   "name": "@akdasa-studios/framework-sync",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Template",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/akdasa-studios/framework-sync#readme",
   "dependencies": {
-    "@akdasa-studios/framework": "0.3.0"
+    "@akdasa-studios/framework": "0.4.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.34.4",
