@@ -104,19 +104,29 @@ export class SyncService<
       try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass */}
       if (!targetEntity) {
         repResult.aggregatesSynced++
-        await target.save(sourceEntity, repOptions)
+        await target.save(this.makeCopy(sourceEntity), repOptions)
+        await source.save(sourceEntity, repOptions)
       } else {
         if (sourceEntity.version !== targetEntity.version) {
           repResult.aggregatesSynced++
           const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
           if (winner === sourceEntity) {
-            await target.save(sourceEntity, repOptions)
+            await target.save(this.makeCopy(sourceEntity), repOptions)
+            await source.save(sourceEntity, repOptions)
           } else {
-            await source.save(targetEntity, repOptions)
+            await source.save(this.makeCopy(targetEntity), repOptions)
+            await target.save(targetEntity, repOptions)
           }
         }
       }
     }
     return repResult
   }
+
+  private makeCopy(entity: TAggregate): TAggregate {
+    const copy = Object.create(entity)
+    Object.assign(copy, entity)
+    return copy
+  }
+
 }

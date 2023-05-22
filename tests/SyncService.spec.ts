@@ -9,13 +9,17 @@ describe('SyncService', () => {
   let row2: Row
   let repoA: SyncRepository<Row>
   let repoB: SyncRepository<Row>
+  let repoARaw: InMemoryRepository<Row>
+  let repoBRaw: InMemoryRepository<Row>
   let solver: RowConflictSolwer
   let service: SyncService<Row>
   let spySolveConflict
 
   beforeEach(async () => {
-    repoA = new SyncRepository(new InMemoryRepository<Row>())
-    repoB = new SyncRepository(new InMemoryRepository<Row>())
+    repoARaw = new InMemoryRepository<Row>()
+    repoBRaw = new InMemoryRepository<Row>()
+    repoA = new SyncRepository(repoARaw)
+    repoB = new SyncRepository(repoBRaw)
     solver = new RowConflictSolwer()
     service = new SyncService(solver)
     row1 = new Row(new RowId('row1'), 'row1')
@@ -33,13 +37,13 @@ describe('SyncService', () => {
      */
     it('sync entity in one direction', async () => {
       // arrange:
-      await repoA.save(row1)
+      await repoARaw.save(row1)
 
       // act:
       const result = await service.sync(repoA, repoB)
 
       // assert:
-      const repoBEntities = await repoB.all()
+      const repoBEntities = await repoBRaw.all()
       expect(repoBEntities.length).toEqual(1)
       expect(repoBEntities[0].id.value).toEqual(row1.id.value)
       expect(repoBEntities[0].text).toEqual(row1.text)
@@ -53,15 +57,15 @@ describe('SyncService', () => {
      */
     it('sync entity in two directions', async () => {
       // arrange:
-      await repoA.save(row1)
-      await repoB.save(row2)
+      await repoARaw.save(row1)
+      await repoBRaw.save(row2)
 
       // act:
       const result = await service.sync(repoA, repoB)
 
       // assert:
-      const allA = await repoA.all()
-      const allB = await repoB.all()
+      const allA = await repoARaw.all()
+      const allB = await repoBRaw.all()
       expect(allA).toHaveLength(2)
       expect(allB).toHaveLength(2)
 
@@ -147,13 +151,17 @@ describe('SyncService', () => {
      */
     it('syncedAt are equal for both entities', async () => {
       // act:
-      await repoA.save(row1)
+      await repoARaw.save(row1)
       await service.sync(repoA, repoB)
 
       // assert:
-      const row1FromA = await repoA.get(row1.id)
-      const row1FromB = await repoB.get(row1.id)
+      const row1FromA = await repoARaw.get(row1.id)
+      const row1FromB = await repoBRaw.get(row1.id)
+
       expect(row1FromA.syncedAt === row1FromB.syncedAt).toBeTrue()
+      expect(row1FromA.syncedAt !== 0).toBeTrue()
+      expect(row1FromA.syncedAt).toBeDefined()
+
     })
 
     /**

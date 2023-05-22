@@ -42,8 +42,12 @@ export class SyncRepository<
   /**
    * Save entity.
    * @param entity Entity to save.
+   * @param options Options for saving.
    */
-  async save(entity: TAggregate, options?: Partial<SaveOptions>): Promise<void> {
+  async save(
+    entity: TAggregate,
+    options?: Partial<SaveOptions>
+  ): Promise<void> {
     const saveOptions: SaveOptions = {
       ...DEFAULT_SAVE_OPTIONS,
       ...options
