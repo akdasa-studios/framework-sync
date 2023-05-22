@@ -36,7 +36,7 @@ describe('SyncService', () => {
       await repoA.save(row1)
 
       // act:
-      await service.sync(repoA, repoB)
+      const result = await service.sync(repoA, repoB)
 
       // assert:
       const repoBEntities = await repoB.all()
@@ -45,6 +45,7 @@ describe('SyncService', () => {
       expect(repoBEntities[0].text).toEqual(row1.text)
       expect(repoBEntities[0].version).toEqual(row1.version)
       expect(spySolveConflict).not.toBeCalled()
+      expect(result.aggregatesSynced).toEqual(1)
     })
 
     /**
@@ -56,7 +57,7 @@ describe('SyncService', () => {
       await repoB.save(row2)
 
       // act:
-      await service.sync(repoA, repoB)
+      const result = await service.sync(repoA, repoB)
 
       // assert:
       const allA = await repoA.all()
@@ -73,9 +74,10 @@ describe('SyncService', () => {
       expect(allA.map(x => x.version)).toIncludeAllMembers([row1.version, row2.version])
 
       expect(spySolveConflict).not.toBeCalled()
+      expect(result.aggregatesSynced).toEqual(2)
     })
 
-    it('do not sync if versons are ewual', async () => {
+    it('do not sync if versons are equal', async () => {
       // arrange:
       await repoA.save(row1, { version: 'v1' })
       await repoB.save(row1, { version: 'v1' })
@@ -85,7 +87,8 @@ describe('SyncService', () => {
 
       // assert:
       expect(spySolveConflict).not.toBeCalled()
-      expect(result.entitiesChecked).toEqual(2)
+      expect(result.aggregatesChecked).toEqual(2)
+      expect(result.aggregatesSynced).toEqual(0)
     })
 
     /**
@@ -102,7 +105,7 @@ describe('SyncService', () => {
       await repoB.save(row2) // v1
 
       // act:
-      await service.sync(repoA, repoB)
+      const result = await service.sync(repoA, repoB)
 
       // assert:
       row1 = await repoA.get(new RowId('row1'))
@@ -112,6 +115,7 @@ describe('SyncService', () => {
       expect(row2.text).toEqual('!winner!')
       expect(row1.version).toEqual(row2.version)
       expect(spySolveConflict).toBeCalledTimes(1)
+      expect(result.aggregatesSynced).toEqual(1)
     })
 
     /**
@@ -124,7 +128,7 @@ describe('SyncService', () => {
       // act
       await repoA.save(row1) // v1
       await repoB.save(row2) // v1
-      await service.sync(repoA, repoB)
+      const result = await service.sync(repoA, repoB)
 
       // assert
       row1 = await repoA.get(new RowId('row1'))
@@ -134,6 +138,7 @@ describe('SyncService', () => {
       expect(row2.text).toEqual('!WINNER!')
       expect(row1.version).toEqual(row2.version)
       expect(spySolveConflict).toBeCalledTimes(1)
+      expect(result.aggregatesSynced).toEqual(1)
     })
 
     /**
@@ -179,12 +184,13 @@ describe('SyncService', () => {
 
       // act:
       const result = await service.sync(repoA, repoB, {
-        lastSyncTime: state.syncedAt,
-        currentTime: state.syncedAt + 1000
+        lastSyncTime: state.completedAt,
+        currentTime: state.completedAt + 1000
       })
 
       // assert:
-      expect(result.entitiesChecked).toEqual(0)
+      expect(result.aggregatesChecked).toEqual(0)
+      expect(result.aggregatesSynced).toEqual(0)
     })
 
     /**
@@ -199,12 +205,13 @@ describe('SyncService', () => {
       row1 = await repoA.get(row1.id)
       await repoA.save(row1)
       const result = await service.sync(repoA, repoB, {
-        lastSyncTime: state.syncedAt,
-        currentTime: state.syncedAt + 1000
+        lastSyncTime: state.completedAt,
+        currentTime: state.completedAt + 1000
       })
 
       // assert:
-      expect(result.entitiesChecked).toEqual(1)
+      expect(result.aggregatesChecked).toEqual(1)
+      expect(result.aggregatesSynced).toEqual(1)
     })
 
     /**
@@ -220,7 +227,8 @@ describe('SyncService', () => {
 
       // assert:
       expect(spySolveConflict).toBeCalled()
-      expect(state.entitiesChecked).toEqual(1)
+      expect(state.aggregatesChecked).toEqual(1)
+      expect(state.aggregatesSynced).toEqual(1)
     })
 
     /**
@@ -236,7 +244,28 @@ describe('SyncService', () => {
 
       // assert:
       expect(spySolveConflict).not.toBeCalled()
-      expect(state.entitiesChecked).toEqual(2)
+      expect(state.aggregatesChecked).toEqual(2)
+      expect(state.aggregatesSynced).toEqual(2)
+    })
+
+
+    /**
+     * Should not sync entities that were not changed since last sync
+     */
+    it('full sync', async () => {
+      // arrange:
+      await repoA.save(row1)
+      await service.sync(repoA, repoB)
+
+      // act:
+      const result = await service.sync(repoA, repoB, {
+        lastSyncTime: 0,
+        currentTime: new Date().getTime() + 10
+      })
+
+      // assert:
+      expect(result.aggregatesChecked).toEqual(2)
+      expect(result.aggregatesSynced).toEqual(0) // objects didn't change
     })
   })
 })

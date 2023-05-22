@@ -5,17 +5,33 @@ import { SyncConflictSolver } from '@lib/SyncConflictSolver'
 import { syncedDuring } from '@lib/queries/sync'
 
 
+/**
+ * The result of a synchronization.
+ */
 export interface SyncResult {
-  entitiesChecked: number
-  syncedAt: number
+  // Number of aggregates checked for synchronization.
+  aggregatesChecked: number
+
+  // Number of aggregates synchronized.
+  aggregatesSynced: number
+
+  // Time when the synchronization was completed.
+  completedAt: number
 }
 
-export interface ReplicationResult {
-  entitiesChecked: number
-}
+/**
+ * The result of a replication.
+ */
+export type ReplicationResult = Pick<SyncResult, 'aggregatesChecked' | 'aggregatesSynced'>
 
+/**
+ * Options for synchronization.
+ */
 export interface SyncOptions {
+  // The time of the last synchronization.
   lastSyncTime: number
+
+  // Current time
   currentTime: number
 }
 
@@ -34,57 +50,74 @@ export class SyncService<
     private readonly conflictSolver: SyncConflictSolver<TAggregate>
   ) {}
 
-
+  /**
+   * Synchronizes two repositories.
+   * @param repo1 The first repository.
+   * @param repo2 The second repository.
+   * @param options The options for synchronization.
+   * @returns The result of the synchronization.
+   */
   async sync(
     repo1: SyncRepository<TAggregate>,
     repo2: SyncRepository<TAggregate>,
     options?: SyncOptions
   ): Promise<SyncResult> {
+    // Get default options
     const o = {
       currentTime:  options?.currentTime  || new Date().getTime(),
       lastSyncTime: options?.lastSyncTime || 0,
     }
 
+    // Replicate repositories in both directions
     const one = await this.replicate(repo1, repo2, o)
     const two = await this.replicate(repo2, repo1, o)
 
     return {
-      entitiesChecked: one.entitiesChecked + two.entitiesChecked,
-      syncedAt: o.currentTime,
+      aggregatesChecked: one.aggregatesChecked + two.aggregatesChecked,
+      aggregatesSynced:  one.aggregatesSynced  + two.aggregatesSynced,
+      completedAt: o.currentTime,
     }
   }
 
+  /**
+   * Replicates the source repository to the target repository.
+   * @param source Source repository
+   * @param target Target repository
+   * @param options The options for synchronization.
+   * @returns The result of the replication.
+   */
   async replicate(
     source: SyncRepository<TAggregate>,
     target: SyncRepository<TAggregate>,
     options: SyncOptions
   ): Promise<ReplicationResult> {
-    // Stryker disable next-line all
-    const syncOptions = { updateVersion: false, syncedAt: options.currentTime }
-    const q = syncedDuring(options.lastSyncTime, options.currentTime)
-    const result: ReplicationResult = { entitiesChecked: 0 }
-
-    // @ts-ignore
-    const entitiesToSync = await source.find(q)
+    const repResult: ReplicationResult = { aggregatesChecked: 0, aggregatesSynced: 0 }
+    const repOptions = { updateVersion: false, syncedAt: options.currentTime }
+    const entitiesToSync = await source.find(
+      // @ts-ignore
+      syncedDuring(options.lastSyncTime, options.currentTime)
+    )
 
     for (const sourceEntity of entitiesToSync) {
-      result.entitiesChecked++
+      repResult.aggregatesChecked++
 
       let targetEntity: TAggregate|undefined = undefined
       try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass */}
       if (!targetEntity) {
-        await target.save(sourceEntity, syncOptions)
+        repResult.aggregatesSynced++
+        await target.save(sourceEntity, repOptions)
       } else {
         if (sourceEntity.version !== targetEntity.version) {
+          repResult.aggregatesSynced++
           const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
           if (winner === sourceEntity) {
-            await target.save(sourceEntity, syncOptions)
+            await target.save(sourceEntity, repOptions)
           } else {
-            await source.save(targetEntity, syncOptions)
+            await source.save(targetEntity, repOptions)
           }
         }
       }
     }
-    return result
+    return repResult
   }
 }
