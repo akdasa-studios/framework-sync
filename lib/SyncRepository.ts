@@ -1,27 +1,31 @@
-import { Repository, Aggregate, AnyIdentity, Query } from '@akdasa-studios/framework'
+import { Repository, AnyIdentity, Query } from '@akdasa-studios/framework'
+import { SyncAggregate } from './SyncAggregate'
 
 
-export interface HasVersion {
-  version: string
-}
 
 export interface SaveOptions {
   updateVersion: boolean
   versionGenerator: VersionGenerator
+  version?: string
+  syncedAt: number
 }
 
-export type VersionGenerator = (aggregate: Aggregate<AnyIdentity> & HasVersion) => string
+export type VersionGenerator = (aggregate: SyncAggregate<AnyIdentity>) => string
 
 const DEFAULT_SAVE_OPTIONS: SaveOptions = {
   updateVersion: true,
-  versionGenerator: function() { return Math.random().toString(36) }
+  versionGenerator: function() {
+    // Stryker disable next-line all
+    return (Math.random() + 1).toString(36).substring(7)
+  },
+  syncedAt: 0
 }
 
 /**
  * Interface for a repository.
  */
 export class SyncRepository<
-  TEntity extends (Aggregate<AnyIdentity> & HasVersion)
+  TEntity extends SyncAggregate<AnyIdentity>
 > implements Repository<TEntity> {
   constructor(
     private readonly repo: Repository<TEntity>
@@ -45,8 +49,9 @@ export class SyncRepository<
       ...options
     }
     if (saveOptions.updateVersion) {
-      entity.version = saveOptions.versionGenerator(entity)
+      entity.version = options?.version || saveOptions.versionGenerator(entity)
     }
+    entity.syncedAt = saveOptions.syncedAt
     return this.repo.save(entity)
   }
 

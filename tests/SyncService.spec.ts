@@ -28,10 +28,17 @@ describe('SyncService', () => {
   /* -------------------------------------------------------------------------- */
 
   describe('.sync', () => {
+    /**
+     * Entity from repository A should be synced to repository B
+     */
     it('sync entity in one direction', async () => {
+      // arrange:
       await repoA.save(row1)
+
+      // act:
       await service.sync(repoA, repoB)
 
+      // assert:
       const repoBEntities = await repoB.all()
       expect(repoBEntities.length).toEqual(1)
       expect(repoBEntities[0].id.value).toEqual(row1.id.value)
@@ -40,14 +47,18 @@ describe('SyncService', () => {
       expect(spySolveConflict).not.toBeCalled()
     })
 
+    /**
+     * Entities from both repositories should be synced to each other
+     */
     it('sync entity in two directions', async () => {
+      // arrange:
       await repoA.save(row1)
       await repoB.save(row2)
 
-      // act
+      // act:
       await service.sync(repoA, repoB)
 
-      // assert
+      // assert:
       const allA = await repoA.all()
       const allB = await repoB.all()
       expect(allA).toHaveLength(2)
@@ -64,18 +75,36 @@ describe('SyncService', () => {
       expect(spySolveConflict).not.toBeCalled()
     })
 
-    it('conflict', async () => {
+    it('do not sync if versons are ewual', async () => {
+      // arrange:
+      await repoA.save(row1, { version: 'v1' })
+      await repoB.save(row1, { version: 'v1' })
+
+      // act:
+      const result = await service.sync(repoA, repoB)
+
+      // assert:
+      expect(spySolveConflict).not.toBeCalled()
+      expect(result.entitiesChecked).toEqual(2)
+    })
+
+    /**
+     * Conflict should be resolved by conflict solver and synced to both repositories
+     */
+    it('resove conflicts (one direction)', async () => {
       let row1 = new Row(new RowId('row1'), 'looser')
       let row2 = new Row(new RowId('row1'), '!winner!')
 
-      // act
+      // arrange:
       await repoA.save(row1) // v1
       await repoA.save(row1) // v2
       await repoA.save(row1) // v3
       await repoB.save(row2) // v1
+
+      // act:
       await service.sync(repoA, repoB)
 
-      // assert
+      // assert:
       row1 = await repoA.get(new RowId('row1'))
       row2 = await repoB.get(new RowId('row1'))
 
@@ -85,7 +114,10 @@ describe('SyncService', () => {
       expect(spySolveConflict).toBeCalledTimes(1)
     })
 
-    it('conflict 2', async () => {
+    /**
+     * Conflict should be resolved by conflict solver and synced to both repositories
+     */
+    it('resolve conflict (other direction)', async () => {
       let row1 = new Row(new RowId('row1'), '!WINNER!')
       let row2 = new Row(new RowId('row1'), 'looser')
 
@@ -104,13 +136,107 @@ describe('SyncService', () => {
       expect(spySolveConflict).toBeCalledTimes(1)
     })
 
-    it('no conflict', async () => {
-      await repoA.save(row1) // v1
-      await service.sync(repoA, repoB)
+    /**
+     * syncedAt for both entities from repository A and B should be equal
+     * after sync
+     */
+    it('syncedAt are equal for both entities', async () => {
+      // act:
+      await repoA.save(row1)
       await service.sync(repoA, repoB)
 
-      // assert
+      // assert:
+      const row1FromA = await repoA.get(row1.id)
+      const row1FromB = await repoB.get(row1.id)
+      expect(row1FromA.syncedAt === row1FromB.syncedAt).toBeTrue()
+    })
+
+    /**
+     * version for both entities from repository A and B should be equal
+     * after sync
+     */
+    it('version are equal for both entities', async () => {
+      // After sync, both entities from repository A and B
+      // should have the same version
+
+      // act:
+      await repoA.save(row1)
+      await service.sync(repoA, repoB)
+
+      // assert:
+      const row1FromA = await repoA.get(row1.id)
+      const row1FromB = await repoB.get(row1.id)
+      expect(row1FromA.version === row1FromB.version).toBeTrue()
+    })
+
+    /**
+     * Should not sync entities that were not changed since last sync
+     */
+    it('should not sync entities with no changes', async () => {
+      // arrange:
+      await repoA.save(row1)
+      const state = await service.sync(repoA, repoB)
+
+      // act:
+      const result = await service.sync(repoA, repoB, {
+        lastSyncTime: state.syncedAt,
+        currentTime: state.syncedAt + 1000
+      })
+
+      // assert:
+      expect(result.entitiesChecked).toEqual(0)
+    })
+
+    /**
+     * Should sync entities that were changed since last sync
+     */
+    it('sync changed entities', async () => {
+      // arrange:
+      await repoA.save(row1)
+      const state = await service.sync(repoA, repoB)
+
+      // act:
+      row1 = await repoA.get(row1.id)
+      await repoA.save(row1)
+      const result = await service.sync(repoA, repoB, {
+        lastSyncTime: state.syncedAt,
+        currentTime: state.syncedAt + 1000
+      })
+
+      // assert:
+      expect(result.entitiesChecked).toEqual(1)
+    })
+
+    /**
+     * Conflicting entities should be synced only once
+     */
+    it('conflicting entities sync once', async () => {
+      // arrange:
+      await repoA.save(row1)
+      await repoB.save(row1)
+
+      // act:
+      const state = await service.sync(repoA, repoB)
+
+      // assert:
+      expect(spySolveConflict).toBeCalled()
+      expect(state.entitiesChecked).toEqual(1)
+    })
+
+    /**
+     * Should sync entities in both directions
+     */
+    it('sync entities in both directions', async () => {
+      // arrange:
+      await repoA.save(row1)
+      await repoB.save(row2)
+
+      // act:
+      const state = await service.sync(repoA, repoB)
+
+      // assert:
       expect(spySolveConflict).not.toBeCalled()
+      expect(state.entitiesChecked).toEqual(2)
     })
   })
 })
