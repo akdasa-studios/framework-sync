@@ -25,17 +25,17 @@ const DEFAULT_SAVE_OPTIONS: SaveOptions = {
  * Interface for a repository.
  */
 export class SyncRepository<
-  TEntity extends SyncAggregate<AnyIdentity>
-> implements Repository<TEntity> {
+  TAggregate extends SyncAggregate<AnyIdentity>
+> implements Repository<TAggregate> {
   constructor(
-    private readonly repo: Repository<TEntity>
+    private readonly repo: Repository<TAggregate>
   ) { }
 
   /**
    * Get all entities.
    * @returns All entities.
    */
-  async all(): Promise<readonly TEntity[]> {
+  async all(): Promise<readonly TAggregate[]> {
     return this.repo.all()
   }
 
@@ -43,7 +43,7 @@ export class SyncRepository<
    * Save entity.
    * @param entity Entity to save.
    */
-  async save(entity: TEntity, options?: Partial<SaveOptions>): Promise<void> {
+  async save(entity: TAggregate, options?: Partial<SaveOptions>): Promise<void> {
     const saveOptions: SaveOptions = {
       ...DEFAULT_SAVE_OPTIONS,
       ...options
@@ -59,7 +59,7 @@ export class SyncRepository<
    * Get entity by identity.
    * @param id Identity of the entity to load.
    */
-  async get(id: TEntity['id']): Promise<TEntity> {
+  async get(id: TAggregate['id']): Promise<TAggregate> {
     return this.repo.get(id)
   }
 
@@ -67,7 +67,7 @@ export class SyncRepository<
    * Check if entity exists.
    * @param id Identity of the entity to check.
    */
-  async exists(id: TEntity['id']): Promise<boolean> {
+  async exists(id: TAggregate['id']): Promise<boolean> {
     return this.repo.exists(id)
   }
 
@@ -75,7 +75,7 @@ export class SyncRepository<
    * Find entities by query.
    * @param query Query to find entities by.
    */
-  async find(query: Query<TEntity>): Promise<readonly TEntity[]> {
+  async find(query: Query<TAggregate>): Promise<readonly TAggregate[]> {
     return this.repo.find(query)
   }
 
@@ -83,7 +83,7 @@ export class SyncRepository<
    * Delete entity by identity.
    * @param id Identity of the entity to remove.
    */
-  async delete(id: TEntity['id']): Promise<void> {
+  async delete(id: TAggregate['id']): Promise<void> {
     return this.repo.delete(id)
   }
 }

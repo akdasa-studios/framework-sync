@@ -1,4 +1,4 @@
-import { AnyIdentity } from '@akdasa-studios/framework'
+import { AnyIdentity, Query } from '@akdasa-studios/framework'
 import { SyncAggregate } from '@lib/SyncAggregate'
 import { SyncRepository } from '@lib/SyncRepository'
 import { SyncConflictSolver } from '@lib/SyncConflictSolver'
@@ -94,8 +94,7 @@ export class SyncService<
     const repResult: ReplicationResult = { aggregatesChecked: 0, aggregatesSynced: 0 }
     const repOptions = { updateVersion: false, syncedAt: options.currentTime }
     const entitiesToSync = await source.find(
-      // @ts-ignore
-      syncedDuring(options.lastSyncTime, options.currentTime)
+      syncedDuring(options.lastSyncTime, options.currentTime) as Query<TAggregate>
     )
 
     for (const sourceEntity of entitiesToSync) {
