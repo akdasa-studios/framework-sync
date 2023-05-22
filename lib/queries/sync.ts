@@ -14,16 +14,14 @@ export function syncedDuring(
   to: number
 ): Query<SyncAggregate<AnyIdentity>> {
   const queryBuilder = new QueryBuilder<SyncAggregate<AnyIdentity>>()
-  return queryBuilder.and(
+  return queryBuilder.or(
     queryBuilder.or(
-      queryBuilder.gt('syncedAt', from),
       queryBuilder.eq('syncedAt', undefined),
       queryBuilder.eq('syncedAt', 0),
     ),
-    queryBuilder.or(
+    queryBuilder.and(
+      queryBuilder.gt('syncedAt', from),
       queryBuilder.lt('syncedAt', to),
-      queryBuilder.eq('syncedAt', undefined),
-      queryBuilder.eq('syncedAt', 0),
     )
   )
 }
