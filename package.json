@@ -1,6 +1,6 @@
 {
   "name": "@akdasa-studios/framework-sync",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Template",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
