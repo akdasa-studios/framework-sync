@@ -94,19 +94,18 @@ export class SyncService<
     const repResult: ReplicationResult = { aggregatesChecked: 0, aggregatesSynced: 0 }
     const repOptions = { updateVersion: false, syncedAt: options.currentTime }
 
-    let lastBookmark: string|undefined = undefined
+    let lastSkip = 0
     let continueFetching = true
 
     while (continueFetching) {
       // Get all entities that were synced after the last sync time
       const findResult = await source.find(
         syncedDuring(options.lastSyncTime, options.currentTime) as Query<TAggregate>,
-        { bookmark: lastBookmark}
+        { skip: lastSkip, limit: 25 }
       )
-      const entitiesToSync = findResult.entities
-      lastBookmark = findResult.bookmark
       // Stryker disable next-line all
       continueFetching = findResult.entities.length > 0
+      lastSkip += findResult.slice.count
 
       // Not Handled:
       //   server has entity with version 1 and syncedAt
@@ -114,7 +113,7 @@ export class SyncService<
       // after sync:
       //  client still has entity with no syncedAt
 
-      for (const sourceEntity of entitiesToSync) {
+      for (const sourceEntity of findResult.entities) {
         repResult.aggregatesChecked++
 
         let targetEntity: TAggregate|undefined = undefined
