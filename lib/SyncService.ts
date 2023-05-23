@@ -93,29 +93,47 @@ export class SyncService<
   ): Promise<ReplicationResult> {
     const repResult: ReplicationResult = { aggregatesChecked: 0, aggregatesSynced: 0 }
     const repOptions = { updateVersion: false, syncedAt: options.currentTime }
-    const entitiesToSync = await source.find(
-      syncedDuring(options.lastSyncTime, options.currentTime) as Query<TAggregate>
-    )
 
-    for (const sourceEntity of entitiesToSync) {
-      repResult.aggregatesChecked++
+    let lastBookmark: string|undefined = undefined
+    let continueFetching = true
 
-      let targetEntity: TAggregate|undefined = undefined
-      try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass */}
-      if (!targetEntity) {
-        repResult.aggregatesSynced++
-        await target.save(this.makeCopy(sourceEntity), repOptions)
-        await source.save(sourceEntity, repOptions)
-      } else {
-        if (sourceEntity.version !== targetEntity.version) {
+    while (continueFetching) {
+      // Get all entities that were synced after the last sync time
+      const findResult = await source.find(
+        syncedDuring(options.lastSyncTime, options.currentTime) as Query<TAggregate>,
+        { bookmark: lastBookmark}
+      )
+      const entitiesToSync = findResult.entities
+      lastBookmark = findResult.bookmark
+      // Stryker disable next-line all
+      continueFetching = findResult.entities.length > 0
+
+      // Not Handled:
+      //   server has entity with version 1 and syncedAt
+      //   client has entity with version 1 but with no syncedAt
+      // after sync:
+      //  client still has entity with no syncedAt
+
+      for (const sourceEntity of entitiesToSync) {
+        repResult.aggregatesChecked++
+
+        let targetEntity: TAggregate|undefined = undefined
+        try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass */}
+        if (!targetEntity) {
           repResult.aggregatesSynced++
-          const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
-          if (winner === sourceEntity) {
-            await target.save(this.makeCopy(sourceEntity), repOptions)
-            await source.save(sourceEntity, repOptions)
-          } else {
-            await source.save(this.makeCopy(targetEntity), repOptions)
-            await target.save(targetEntity, repOptions)
+          await target.save(this.makeCopy(sourceEntity), repOptions)
+          await source.save(sourceEntity, repOptions)
+        } else {
+          if (sourceEntity.version !== targetEntity.version) {
+            repResult.aggregatesSynced++
+            const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
+            if (winner === sourceEntity) {
+              await target.save(this.makeCopy(sourceEntity), repOptions)
+              await source.save(sourceEntity, repOptions)
+            } else {
+              await source.save(this.makeCopy(targetEntity), repOptions)
+              await target.save(targetEntity, repOptions)
+            }
           }
         }
       }

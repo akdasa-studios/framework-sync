@@ -1,4 +1,4 @@
-import { Repository, AnyIdentity, Query } from '@akdasa-studios/framework'
+import { AnyIdentity, Query, QueryOptions, Repository, ResultSet } from '@akdasa-studios/framework'
 import { SyncAggregate } from './SyncAggregate'
 
 
@@ -35,7 +35,7 @@ export class SyncRepository<
    * Get all entities.
    * @returns All entities.
    */
-  async all(): Promise<readonly TAggregate[]> {
+  async all(): Promise<ResultSet<TAggregate>> {
     return this.repo.all()
   }
 
@@ -78,9 +78,13 @@ export class SyncRepository<
   /**
    * Find entities by query.
    * @param query Query to find entities by.
+   *
    */
-  async find(query: Query<TAggregate>): Promise<readonly TAggregate[]> {
-    return this.repo.find(query)
+  async find(
+    query: Query<TAggregate>,
+    options?: QueryOptions
+  ): Promise<ResultSet<TAggregate>> {
+    return this.repo.find(query, options)
   }
 
   /**

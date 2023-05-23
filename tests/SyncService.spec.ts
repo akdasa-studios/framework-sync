@@ -43,7 +43,7 @@ describe('SyncService', () => {
       const result = await service.sync(repoA, repoB)
 
       // assert:
-      const repoBEntities = await repoBRaw.all()
+      const repoBEntities = (await repoBRaw.all()).entities
       expect(repoBEntities.length).toEqual(1)
       expect(repoBEntities[0].id.value).toEqual(row1.id.value)
       expect(repoBEntities[0].text).toEqual(row1.text)
@@ -64,8 +64,8 @@ describe('SyncService', () => {
       const result = await service.sync(repoA, repoB)
 
       // assert:
-      const allA = await repoARaw.all()
-      const allB = await repoBRaw.all()
+      const allA = (await repoARaw.all()).entities
+      const allB = (await repoBRaw.all()).entities
       expect(allA).toHaveLength(2)
       expect(allB).toHaveLength(2)
 
