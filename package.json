@@ -33,7 +33,7 @@
   },
   "homepage": "https://github.com/akdasa-studios/framework-sync#readme",
   "dependencies": {
-    "@akdasa-studios/framework": "0.5.2"
+    "@akdasa-studios/framework": "0.5.3"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.34.4",

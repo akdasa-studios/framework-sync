@@ -3,15 +3,12 @@ import { SyncAggregate } from '@lib/SyncAggregate'
 
 
 /**
- * Get all entities that have been synced in the given period. Edges are not included.
- * Includes entities that have not been synced yet.
- * @param from Timestamp of the start of the period.
- * @param to Timestamp of the end of the period.
- * @returns A query that selects all entities that have been synced in the given period.
+ * Query that selects all entities that have been synced after the given timestamp.
+ * @param from Timestamp to select entities from.
+ * @returns A query.
  */
-export function syncedDuring(
+export function syncedAfter(
   from: number,
-  to: number
 ): Query<SyncAggregate<AnyIdentity>> {
   const queryBuilder = new QueryBuilder<SyncAggregate<AnyIdentity>>()
   return queryBuilder.or(
@@ -19,9 +16,6 @@ export function syncedDuring(
       queryBuilder.eq('syncedAt', undefined),
       queryBuilder.eq('syncedAt', 0),
     ),
-    queryBuilder.and(
-      queryBuilder.gt('syncedAt', from),
-      queryBuilder.lt('syncedAt', to),
-    )
+    queryBuilder.gt('syncedAt', from),
   )
 }

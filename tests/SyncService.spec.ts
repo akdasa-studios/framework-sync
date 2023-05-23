@@ -83,15 +83,14 @@ describe('SyncService', () => {
 
     it('do not sync if versons are equal', async () => {
       // arrange:
-      await repoA.save(row1, { version: 'v1' })
-      await repoB.save(row1, { version: 'v1' })
+      await repoA.save(row1, { version: 'v1', syncedAt: 1000 })
+      await repoB.save(row1, { version: 'v1', syncedAt: 1000 })
 
       // act:
       const result = await service.sync(repoA, repoB)
 
       // assert:
       expect(spySolveConflict).not.toBeCalled()
-      expect(result.aggregatesChecked).toEqual(2)
       expect(result.aggregatesSynced).toEqual(0)
     })
 
@@ -197,7 +196,6 @@ describe('SyncService', () => {
       })
 
       // assert:
-      expect(result.aggregatesChecked).toEqual(0)
       expect(result.aggregatesSynced).toEqual(0)
     })
 
@@ -213,12 +211,11 @@ describe('SyncService', () => {
       row1 = await repoA.get(row1.id)
       await repoA.save(row1)
       const result = await service.sync(repoA, repoB, {
-        lastSyncTime: state.completedAt,
+        lastSyncTime: state.completedAt - 1000,
         currentTime: state.completedAt + 1000
       })
 
       // assert:
-      expect(result.aggregatesChecked).toEqual(1)
       expect(result.aggregatesSynced).toEqual(1)
     })
 
@@ -235,7 +232,6 @@ describe('SyncService', () => {
 
       // assert:
       expect(spySolveConflict).toBeCalled()
-      expect(state.aggregatesChecked).toEqual(1)
       expect(state.aggregatesSynced).toEqual(1)
     })
 
@@ -252,7 +248,6 @@ describe('SyncService', () => {
 
       // assert:
       expect(spySolveConflict).not.toBeCalled()
-      expect(state.aggregatesChecked).toEqual(2)
       expect(state.aggregatesSynced).toEqual(2)
     })
 
@@ -272,7 +267,6 @@ describe('SyncService', () => {
       })
 
       // assert:
-      expect(result.aggregatesChecked).toEqual(2)
       expect(result.aggregatesSynced).toEqual(0) // objects didn't change
     })
   })

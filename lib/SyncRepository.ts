@@ -16,7 +16,7 @@ const DEFAULT_SAVE_OPTIONS: SaveOptions = {
   updateVersion: true,
   versionGenerator: function() {
     // Stryker disable next-line all
-    return (Math.random() + 1).toString(36).substring(7)
+    return (Math.random() + 1).toString(36).substring(3)
   },
   syncedAt: 0
 }
@@ -55,7 +55,7 @@ export class SyncRepository<
     if (saveOptions.updateVersion) {
       entity.version = options?.version || saveOptions.versionGenerator(entity)
     }
-    entity.syncedAt = saveOptions.syncedAt
+    entity.syncedAt = saveOptions.syncedAt || new Date().getTime()
     return this.repo.save(entity)
   }
 

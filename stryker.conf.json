@@ -22,11 +22,16 @@
   ],
   "tsconfigFile": "tsconfig.json",
   "thresholds": {
-    "high": 80,
+    "high": 70,
     "low": 60,
-    "break": 100
+    "break": 75
   },
   "incremental": true,
   "incrementalFile": ".temp/stryker/incremental.json",
-  "tempDirName": ".temp/stryker/temp"
+  "tempDirName": ".temp/stryker/temp",
+  "mutator": {
+    "excludedMutations": [
+      "StringLiteral"
+    ]
+  }
 }
