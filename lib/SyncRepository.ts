@@ -55,7 +55,7 @@ export class SyncRepository<
     if (saveOptions.updateVersion) {
       entity.version = options?.version || saveOptions.versionGenerator(entity)
     }
-    entity.syncedAt = saveOptions.syncedAt || new Date().getTime()
+    entity.modifiedAt = saveOptions.syncedAt || new Date().getTime()
     return this.repo.save(entity)
   }
 

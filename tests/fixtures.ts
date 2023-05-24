@@ -11,7 +11,7 @@ export class Row extends Aggregate<RowId> implements Syncable {
     this.text = text
   }
   version: string
-  syncedAt: number
+  modifiedAt: number
   text: string
 }
 

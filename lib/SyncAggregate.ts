@@ -8,9 +8,9 @@ export interface Syncable {
   version: string
 
   /**
-   * Timestamp of the last sync.
+   * Timestamp of the last modification.
    */
-  syncedAt: number
+  modifiedAt: number
 }
 
 /**

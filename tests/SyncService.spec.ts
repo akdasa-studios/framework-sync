@@ -150,16 +150,16 @@ describe('SyncService', () => {
      */
     it('syncedAt are equal for both entities', async () => {
       // act:
-      await repoARaw.save(row1)
+      await repoA.save(row1)
       await service.sync(repoA, repoB)
 
       // assert:
       const row1FromA = await repoARaw.get(row1.id)
       const row1FromB = await repoBRaw.get(row1.id)
 
-      expect(row1FromA.syncedAt === row1FromB.syncedAt).toBeTrue()
-      expect(row1FromA.syncedAt !== 0).toBeTrue()
-      expect(row1FromA.syncedAt).toBeDefined()
+      expect(row1FromA.modifiedAt === row1FromB.modifiedAt).toBeTrue()
+      expect(row1FromA.modifiedAt !== 0).toBeTrue()
+      expect(row1FromA.modifiedAt).toBeDefined()
 
     })
 

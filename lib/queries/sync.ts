@@ -13,9 +13,9 @@ export function syncedAfter(
   const queryBuilder = new QueryBuilder<SyncAggregate<AnyIdentity>>()
   return queryBuilder.or(
     queryBuilder.or(
-      queryBuilder.eq('syncedAt', undefined),
-      queryBuilder.eq('syncedAt', 0),
+      queryBuilder.eq('modifiedAt', undefined),
+      queryBuilder.eq('modifiedAt', 0),
     ),
-    queryBuilder.gt('syncedAt', from),
+    queryBuilder.gt('modifiedAt', from),
   )
 }

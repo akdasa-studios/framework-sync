@@ -1,4 +1,4 @@
-import { AnyIdentity, Query, Logger, Logs, LogTransport, LogRecord } from '@akdasa-studios/framework'
+import { AnyIdentity, Query, Logger } from '@akdasa-studios/framework'
 import { SyncAggregate } from '@lib/SyncAggregate'
 import { SyncRepository } from '@lib/SyncRepository'
 import { SyncConflictSolver } from '@lib/SyncConflictSolver'
@@ -120,30 +120,26 @@ export class SyncService<
 
       for (const sourceEntity of findResult.entities) {
         let targetEntity: TAggregate|undefined = undefined
-        try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass */}
+        try { targetEntity = await target.get(sourceEntity.id) } catch { /** pass **/ }
+
         if (!targetEntity) {
-          this.logger.debug(`${sourceEntity.id.value}: no at target`)
           repResult.aggregatesSynced++
+          this.logger.debug(`${sourceEntity.id.value}: no at target`)
           await target.save(this.makeCopy(sourceEntity), repOptions)
-          await source.save(sourceEntity, repOptions)
-        } else {
-          if (sourceEntity.version !== targetEntity.version) {
-            repResult.aggregatesSynced++
-            const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
-            if (winner === sourceEntity) {
-              this.logger.debug(`${sourceEntity.id}: source won`)
-              await target.save(this.makeCopy(sourceEntity), repOptions)
-              await source.save(sourceEntity, repOptions)
-            } else {
-              this.logger.debug(`${sourceEntity.id}: target won`)
-              await source.save(this.makeCopy(targetEntity), repOptions)
-              await target.save(targetEntity, repOptions)
-            }
+        } else if (sourceEntity.version !== targetEntity.version) {
+          repResult.aggregatesSynced++
+          const winner = this.conflictSolver.solve(sourceEntity, targetEntity)
+          if (winner === sourceEntity) {
+            this.logger.debug(`${sourceEntity.id}: source won`)
+            await target.save(this.makeCopy(sourceEntity), repOptions)
+          } else {
+            this.logger.debug(`${sourceEntity.id}: target won`)
+            await source.save(this.makeCopy(targetEntity), repOptions)
           }
         }
       }
 
-      console.groupEnd()
+      this.logger.endGroup()
     }
     return repResult
   }
